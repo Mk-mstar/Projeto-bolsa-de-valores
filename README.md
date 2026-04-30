@@ -16,6 +16,7 @@ HTML
 CSS
 JavaScript
 Chart.js
+Python
 
 ▶️ Como usar
 Baixe ou clone o projeto
