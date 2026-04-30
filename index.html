@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Financeiro</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            width: 300px;
+            margin: 50px auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        #price {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>📈 PETR4</h1>
+        <div id="price">Carregando...</div>
+        <canvas id="chart"></canvas>
+    </div>
+
+    <script>
+        let prices = [];
+        let labels = [];
+
+      async function getStock() {
+    const res = await fetch("/api/stock");
+    const data = await res.json();
+
+    if (!data.price || data.price === "Erro") {
+        document.getElementById("price").innerText = "Erro ao carregar";
+        return;
+    }
+
+    const price = parseFloat(data.price);
+
+    if (isNaN(price)) return;
+
+    document.getElementById("price").innerText = "R$ " + price;
+
+    const time = new Date().toLocaleTimeString();
+
+    labels.push(time);
+    prices.push(price);
+
+    if (labels.length > 10) {
+        labels.shift();
+        prices.shift();
+    }
+
+    chart.update();
+}
+        setInterval(getStock, 5000);
+        getStock();
+    </script>
+
+</body>
+</html>
