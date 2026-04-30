@@ -1,36 +1,37 @@
-from flask import Flask, render_template, jsonify
-import requests
+from flask import Flask, render_template, jsonify, request
+import yfinance as yf
 
 app = Flask(__name__)
 
-API_KEY = "9FEFPI1WYVHTQSG5"
-SYMBOL = "PETR4.SA"
-
-def get_stock():
-    url = "https://www.alphavantage.co/query"
-    params = {
-        "function": "GLOBAL_QUOTE",
-        "symbol": SYMBOL,
-        "apikey": API_KEY
-    }
-
-    response = requests.get(url, params=params)
-    data = response.json()
-    print(data) # Para depuração
-
+def get_stock(symbol):
     try:
-        price = data["Global Quote"]["05. price"]
-        return {"price": price}
+        stock = yf.Ticker(symbol)
+        data = stock.history(period="1d", interval="1m")
+
+        if data.empty:
+            return {"price": "Erro", "history": []}
+
+        prices = data["Close"].dropna().tolist()
+
+        return {
+            "price": float(prices[-1]),
+            "history": prices[-50:]
+        }
+
     except:
-        return {"price": "Erro"}
+        return {"price": "Erro", "history": []}
+
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+
 @app.route("/api/stock")
 def stock():
-    return jsonify(get_stock())
+    symbol = request.args.get("symbol")
+    return jsonify(get_stock(symbol))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

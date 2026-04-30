@@ -1,84 +1,495 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard Financeiro</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Broker Pro Engine</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
 
-        .card {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            width: 300px;
-            margin: 50px auto;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
+body{
+    background:#0f172a;
+    color:#e5e7eb;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
 
-        h1 {
-            margin-bottom: 10px;
-        }
+/* HEADER */
+.header{
+    height:55px;
+    background:#020617;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    border-bottom:1px solid #1f2937;
+}
 
-        #price {
-            font-size: 2rem;
-            margin: 10px 0;
-        }
+.logo{
+    font-size:18px;
+    font-weight:bold;
+    color:#22c55e;
+}
 
-        canvas {
-            margin-top: 20px;
-        }
-    </style>
+.header-right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+select{
+    background:#111827;
+    color:white;
+    border:none;
+    padding:6px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* LAYOUT */
+.container{
+    flex:1;
+    display:grid;
+    grid-template-columns:220px 1fr 260px;
+    overflow:hidden;
+}
+
+/* SIDEBAR */
+.sidebar{
+    background:#020617;
+    border-right:1px solid #1f2937;
+    padding:10px;
+}
+
+.sidebar-title{
+    color:#94a3b8;
+    font-size:14px;
+    margin-bottom:10px;
+    cursor:pointer;
+}
+
+.stock-item{
+    padding:10px;
+    margin-bottom:6px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.stock-item:hover{
+    background:#111827;
+}
+
+.stock-item.active{
+    background:#111827;
+    border-left:3px solid #22c55e;
+}
+
+/* MAIN */
+.main{
+    display:flex;
+    flex-direction:column;
+    background:#020617;
+    padding:10px;
+}
+
+.top-info{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:10px;
+}
+
+.top-info h2{
+    font-size:16px;
+    color:#94a3b8;
+}
+
+.price{
+    font-size:22px;
+    font-weight:bold;
+    color:#22c55e;
+}
+
+/* GRÁFICO */
+.chart-box{
+    flex:1;
+    background:#020617;
+    position:relative;
+}
+
+canvas{
+    width:100% !important;
+    height:100% !important;
+    cursor:grab;
+}
+
+canvas:active{cursor:grabbing;}
+
+/* ===== BARRA LATERAL ===== */
+.trade-bar{
+    position:absolute;
+    right:20px;
+    top:0;
+    height:100%;
+    display:flex;
+    align-items:center;
+    pointer-events:none;
+}
+
+.trade-line{
+    position:absolute;
+    right:40px;
+    height:100%;
+    border-right:2px dotted rgba(255,255,255,0.3);
+}
+
+.trade-info{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:5px;
+}
+
+.bar{
+    width:8px;
+    height:200px;
+    display:flex;
+    flex-direction:column;
+    border-radius:5px;
+    overflow:hidden;
+}
+
+.green{
+    background:#22c55e;
+    height:45%;
+}
+
+.red{
+    background:#ef4444;
+    height:55%;
+}
+
+.percent{
+    font-size:12px;
+    color:#94a3b8;
+}
+
+/* DIREITA */
+.right{
+    background:#020617;
+    border-left:1px solid #1f2937;
+    padding:15px;
+}
+
+.panel{
+    background:#020617;
+    border:1px solid #1f2937;
+    padding:10px;
+    border-radius:8px;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="card">
-        <h1>📈 PETR4</h1>
-        <div id="price">Carregando...</div>
-        <canvas id="chart"></canvas>
+<div class="header">
+    <div class="logo">📊 Home Broker PRO</div>
+
+    <div class="header-right">
+        <select id="intervalSelect" onchange="changeInterval()">
+            <option value="5000">5s</option>
+            <option value="10000">10s</option>
+            <option value="30000">30s</option>
+            <option value="60000">1m</option>
+        </select>
+
+        <select id="chartType" onchange="changeChartType()">
+            <option value="line">Linha</option>
+            <option value="candlestick">Vela</option>
+        </select>
+    </div>
+</div>
+
+<div class="container">
+
+<div class="sidebar">
+    <div class="sidebar-title" onclick="toggleStocks()">📈 Ações</div>
+
+    <div id="stockList">
+        <div class="stock-item active" onclick="selectStock('PETR4.SA','PETR4',event)">PETR4</div>
+        <div class="stock-item" onclick="selectStock('VALE3.SA','VALE3',event)">VALE3</div>
+        <div class="stock-item" onclick="selectStock('ITUB4.SA','ITUB4',event)">ITUB4</div>
+        <div class="stock-item" onclick="selectStock('AAPL','AAPL',event)">AAPL</div>
+        <div class="stock-item" onclick="selectStock('TSLA','TSLA',event)">TSLA</div>
+    </div>
+</div>
+
+<div class="main">
+
+    <div class="top-info">
+        <h2 id="symbol">PETR4</h2>
+        <div class="price" id="price">--</div>
     </div>
 
-    <script>
-        let prices = [];
-        let labels = [];
+    <div class="chart-box">
+        <canvas id="chart"></canvas>
 
-      async function getStock() {
-    const res = await fetch("/api/stock");
-    const data = await res.json();
+        <!-- BARRA -->
+        <div class="trade-bar">
+            <div class="trade-line"></div>
 
-    if (!data.price || data.price === "Erro") {
-        document.getElementById("price").innerText = "Erro ao carregar";
-        return;
-    }
+            <div class="trade-info">
+                <div class="percent top">45%</div>
 
-    const price = parseFloat(data.price);
+                <div class="bar">
+                    <div class="green"></div>
+                    <div class="red"></div>
+                </div>
 
-    if (isNaN(price)) return;
+                <div class="percent bottom">55%</div>
+            </div>
+        </div>
 
-    document.getElementById("price").innerText = "R$ " + price;
+    </div>
 
-    const time = new Date().toLocaleTimeString();
+</div>
 
-    labels.push(time);
-    prices.push(price);
+<div class="right">
+    <div class="panel">
+        <div>Última atualização</div>
+        <div id="time">--</div>
+    </div>
+</div>
 
-    if (labels.length > 10) {
-        labels.shift();
-        prices.shift();
-    }
+</div>
 
-    chart.update();
+<script>
+let chart;
+let currentSymbol='PETR4.SA';
+let intervalTime=5000;
+let intervalId;
+let chartType='line';
+
+let priceHistory=[];
+let candles=[];
+
+if(window['chartjs-plugin-zoom']){
+    Chart.register(window['chartjs-plugin-zoom']);
 }
-        setInterval(getStock, 5000);
-        getStock();
-    </script>
+
+function toggleStocks(){
+    const el=document.getElementById('stockList');
+    el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function destroyChart(){
+    if(chart) chart.destroy();
+}
+
+function createLineChart(){
+    const ctx=document.getElementById('chart').getContext('2d');
+
+    chart=new Chart(ctx,{
+        type:'line',
+        data:{
+            labels:priceHistory.map((_,i)=>i),
+            datasets:[{
+                data:priceHistory,
+                borderColor:'#22c55e',
+                borderWidth:1.5,
+                tension:0.2,
+                fill:true,
+                backgroundColor:'rgba(34,197,94,0.05)'
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            animation:false,
+            plugins:{
+                zoom:{
+                    pan:{enabled:true,mode:'x'},
+                    zoom:{wheel:{enabled:true},mode:'x'}
+                },
+                legend:{display:false}
+            },
+            scales:{
+                x:{display:false},
+                y:{
+                    display:false,
+                    grace:'5%'
+                }
+            }
+        }
+    });
+}
+
+function createCandleChart(){
+    const ctx=document.getElementById('chart').getContext('2d');
+
+    chart=new Chart(ctx,{
+        type:'line',
+        data:{
+            labels:candles.map(c=>c.x),
+            datasets:[{
+                data:candles.map(c=>c.c),
+                borderWidth:0,
+                pointRadius:0
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            animation:false,
+            plugins:{legend:{display:false}},
+            scales:{
+                x:{display:false},
+                y:{
+                    display:false,
+                    grace:'5%'
+                }
+            }
+        },
+        plugins:[{
+            id:'candles_draw',
+            afterDatasetsDraw(chart){
+                const ctx=chart.ctx;
+                const xScale=chart.scales.x;
+                const yScale=chart.scales.y;
+
+                candles.forEach(c=>{
+                    const x=xScale.getPixelForValue(c.x);
+                    const yO=yScale.getPixelForValue(c.o);
+                    const yC=yScale.getPixelForValue(c.c);
+                    const yH=yScale.getPixelForValue(c.h);
+                    const yL=yScale.getPixelForValue(c.l);
+
+                    const color=c.c>=c.o?'#22c55e':'#ef4444';
+
+                    ctx.strokeStyle=color;
+                    ctx.fillStyle=color;
+
+                    ctx.beginPath();
+                    ctx.moveTo(x,yH);
+                    ctx.lineTo(x,yL);
+                    ctx.stroke();
+
+                    ctx.fillRect(x-3,Math.min(yO,yC),6,Math.abs(yO-yC));
+                });
+            }
+        }]
+    });
+}
+
+function rebuild(){
+    destroyChart();
+    if(chartType==='candlestick') createCandleChart();
+    else createLineChart();
+}
+
+function selectStock(symbol,name,e){
+    currentSymbol=symbol;
+    document.getElementById('symbol').innerText=name;
+
+    document.querySelectorAll('.stock-item').forEach(el=>el.classList.remove('active'));
+    e.target.classList.add('active');
+
+    loadStock();
+}
+
+async function loadStock(){
+    const res=await fetch(`/api/stock?symbol=${currentSymbol}`);
+    const data=await res.json();
+
+    priceHistory=data.history;
+    candles=[];
+
+    for(let i=1;i<priceHistory.length;i++){
+        const o=priceHistory[i-1];
+        const c=priceHistory[i];
+        candles.push({
+            x:i,
+            o,
+            h:Math.max(o,c)+Math.random()*0.5,
+            l:Math.min(o,c)-Math.random()*0.5,
+            c
+        });
+    }
+
+    rebuild();
+    document.getElementById('price').innerText='R$ '+data.price.toFixed(2);
+}
+
+async function updateStock(){
+    const res=await fetch(`/api/stock?symbol=${currentSymbol}`);
+    const data=await res.json();
+
+    priceHistory.push(data.price);
+    if(priceHistory.length>80) priceHistory.shift();
+
+    const last=priceHistory[priceHistory.length-2]||data.price;
+
+    candles.push({
+        x:candles.length,
+        o:last,
+        c:data.price,
+        h:Math.max(last,data.price),
+        l:Math.min(last,data.price)
+    });
+
+    if(candles.length>80) candles.shift();
+
+    if(chart){
+        if(chartType==='line'){
+            chart.data.datasets[0].data=priceHistory;
+            chart.data.labels=priceHistory.map((_,i)=>i);
+        }else{
+            chart.data.datasets[0].data=candles.map(c=>c.c);
+            chart.data.labels=candles.map(c=>c.x);
+        }
+        chart.update();
+        chart.resize(); // 🔥 CORREÇÃO DO CORTE
+    }
+
+    document.getElementById('price').innerText='R$ '+data.price.toFixed(2);
+    document.getElementById('time').innerText=new Date().toLocaleTimeString();
+
+    updateBar(Math.floor(Math.random()*100));
+}
+
+function changeChartType(){
+    chartType=document.getElementById('chartType').value;
+    rebuild();
+}
+
+function changeInterval(){
+    intervalTime=parseInt(document.getElementById('intervalSelect').value);
+    clearInterval(intervalId);
+    intervalId=setInterval(updateStock,intervalTime);
+}
+
+function updateBar(value){
+    document.querySelector('.green').style.height = value + '%';
+    document.querySelector('.red').style.height = (100 - value) + '%';
+
+    document.querySelector('.top').innerText = value + '%';
+    document.querySelector('.bottom').innerText = (100 - value) + '%';
+}
+
+loadStock();
+intervalId=setInterval(updateStock,intervalTime);
+</script>
 
 </body>
 </html>
