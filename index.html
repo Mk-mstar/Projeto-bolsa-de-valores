@@ -6,6 +6,7 @@
 <title>Home Broker Pro Engine</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 
 <style>
@@ -17,7 +18,7 @@
 }
 
 body{
-    background:#0f172a;
+    background:#080c14;
     color:#e5e7eb;
     height:100vh;
     display:flex;
@@ -25,20 +26,63 @@ body{
     overflow:hidden;
 }
 
-/* HEADER */
+button,
+select,
+input{
+    background:#111827;
+    color:#f8fafc;
+    border:1px solid #1f2937;
+    border-radius:6px;
+    outline:none;
+}
+
+button,
+select{
+    cursor:pointer;
+}
+
+button:hover,
+select:hover{
+    background:#1f2937;
+}
+
 .header{
-    height:55px;
+    min-height:62px;
     background:#020617;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 20px;
+    gap:16px;
+    padding:10px 18px;
     border-bottom:1px solid #1f2937;
+}
+
+.brand{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
 }
 
 .logo{
     font-size:18px;
     font-weight:bold;
+    color:#22c55e;
+    white-space:nowrap;
+}
+
+.subtitle{
+    color:#64748b;
+    font-size:12px;
+}
+
+.market-status{
+    min-width:190px;
+    color:#94a3b8;
+    font-size:13px;
+    text-align:center;
+}
+
+.market-status strong{
     color:#22c55e;
 }
 
@@ -46,43 +90,104 @@ body{
     display:flex;
     gap:10px;
     align-items:center;
+    flex-wrap:wrap;
+    justify-content:flex-end;
 }
 
-select{
-    background:#111827;
-    color:white;
-    border:none;
-    padding:6px;
-    border-radius:6px;
-    cursor:pointer;
+.header-right select,
+.header-right button{
+    padding:7px 10px;
 }
 
-/* LAYOUT */
 .container{
     flex:1;
     display:grid;
-    grid-template-columns:220px 1fr 260px;
+    grid-template-columns:330px minmax(0, 1fr) 330px;
     overflow:hidden;
 }
 
-/* SIDEBAR */
-.sidebar{
+.sidebar,
+.right{
     background:#020617;
-    border-right:1px solid #1f2937;
-    padding:10px;
+    overflow:auto;
 }
 
+.sidebar{
+    border-right:1px solid #1f2937;
+    padding:12px;
+}
+
+.right{
+    border-left:1px solid #1f2937;
+    padding:12px;
+}
+
+.panel{
+    background:#020617;
+    border:1px solid #1f2937;
+    border-radius:8px;
+    padding:12px;
+    margin-bottom:12px;
+}
+
+.panel-title,
 .sidebar-title{
     color:#94a3b8;
-    font-size:14px;
+    font-size:13px;
     margin-bottom:10px;
-    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+}
+
+.search-row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px;
+    margin-bottom:10px;
+}
+
+.search-row input{
+    min-width:0;
+    padding:8px 9px;
+}
+
+.search-row button{
+    padding:8px 10px;
+}
+
+.category-tabs,
+.rank-tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:10px;
+}
+
+.cat-btn,
+.rank-btn,
+.indicator-toggle{
+    padding:6px 8px;
+    color:#94a3b8;
+    font-size:12px;
+}
+
+.cat-btn.active,
+.rank-btn.active,
+.indicator-toggle.active{
+    background:#064e3b;
+    color:#dcfce7;
+    border-color:#15803d;
 }
 
 .stock-item{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) auto;
+    gap:8px 10px;
     padding:10px;
-    margin-bottom:6px;
-    border-radius:6px;
+    margin-bottom:7px;
+    border-radius:7px;
     cursor:pointer;
     transition:0.2s;
 }
@@ -96,36 +201,158 @@ select{
     border-left:3px solid #22c55e;
 }
 
-/* MAIN */
+.stock-name{
+    font-size:14px;
+    font-weight:bold;
+    color:#f8fafc;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.stock-symbol,
+.stock-market{
+    color:#64748b;
+    font-size:12px;
+}
+
+.stock-price{
+    text-align:right;
+    color:#e5e7eb;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.stock-change{
+    text-align:right;
+    font-size:12px;
+}
+
+.spark{
+    grid-column:1 / -1;
+    height:26px;
+    width:100%;
+}
+
+.up{
+    color:#22c55e;
+}
+
+.down{
+    color:#ef4444;
+}
+
+.neutral{
+    color:#94a3b8;
+}
+
 .main{
     display:flex;
     flex-direction:column;
     background:#020617;
-    padding:10px;
+    padding:12px;
+    min-width:0;
 }
 
 .top-info{
     display:flex;
     justify-content:space-between;
+    align-items:flex-start;
     margin-bottom:10px;
+    gap:16px;
 }
 
-.top-info h2{
-    font-size:16px;
-    color:#94a3b8;
+.asset-info h2{
+    font-size:22px;
+    color:#f8fafc;
+}
+
+.asset-meta{
+    color:#64748b;
+    font-size:12px;
+    margin-top:2px;
+}
+
+.price-box{
+    text-align:right;
 }
 
 .price{
-    font-size:22px;
+    font-size:27px;
     font-weight:bold;
-    color:#22c55e;
 }
 
-/* GRÁFICO */
-.chart-box{
+.variation{
+    margin-top:4px;
+    font-size:13px;
+}
+
+.toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+}
+
+.timeframe-bar,
+.indicator-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+.tf-btn{
+    min-width:44px;
+    padding:6px 8px;
+    color:#94a3b8;
+}
+
+.tf-btn.active{
+    background:#064e3b;
+    color:#dcfce7;
+    border-color:#15803d;
+}
+
+.indicator-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    user-select:none;
+}
+
+.indicator-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+}
+
+.ma9-dot{background:#38bdf8;}
+.ma21-dot{background:#f59e0b;}
+.bb-dot{background:#a78bfa;}
+.vwap-dot{background:#f472b6;}
+
+.chart-stack{
     flex:1;
+    display:grid;
+    grid-template-rows:minmax(0, 1fr) 124px;
+    gap:8px;
+    min-height:0;
+}
+
+.chart-box,
+.volume-box,
+.compare-chart-box{
     background:#020617;
     position:relative;
+    min-height:0;
+}
+
+.volume-box{
+    border-top:1px solid #111827;
+    padding-top:6px;
 }
 
 canvas{
@@ -134,12 +361,13 @@ canvas{
     cursor:grab;
 }
 
-canvas:active{cursor:grabbing;}
+canvas:active{
+    cursor:grabbing;
+}
 
-/* ===== BARRA LATERAL ===== */
 .trade-bar{
     position:absolute;
-    right:20px;
+    right:54px;
     top:0;
     height:100%;
     display:flex;
@@ -151,7 +379,7 @@ canvas:active{cursor:grabbing;}
     position:absolute;
     right:40px;
     height:100%;
-    border-right:2px dotted rgba(255,255,255,0.3);
+    border-right:2px dotted rgba(255,255,255,0.16);
 }
 
 .trade-info{
@@ -162,22 +390,25 @@ canvas:active{cursor:grabbing;}
 }
 
 .bar{
-    width:8px;
-    height:200px;
+    width:9px;
+    height:210px;
     display:flex;
     flex-direction:column;
     border-radius:5px;
     overflow:hidden;
+    background:#1f2937;
 }
 
 .green{
     background:#22c55e;
-    height:45%;
+    height:50%;
+    transition:height 0.3s;
 }
 
 .red{
     background:#ef4444;
-    height:55%;
+    height:50%;
+    transition:height 0.3s;
 }
 
 .percent{
@@ -185,18 +416,131 @@ canvas:active{cursor:grabbing;}
     color:#94a3b8;
 }
 
-/* DIREITA */
-.right{
-    background:#020617;
-    border-left:1px solid #1f2937;
-    padding:15px;
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:7px 0;
+    border-bottom:1px solid #111827;
+    font-size:14px;
 }
 
-.panel{
-    background:#020617;
+.info-row:last-child{
+    border-bottom:none;
+}
+
+.info-row span:first-child{
+    color:#64748b;
+}
+
+.status{
+    font-size:13px;
+    color:#94a3b8;
+}
+
+.status.ok{
+    color:#22c55e;
+}
+
+.status.error{
+    color:#ef4444;
+}
+
+.ranking-list{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.ranking-item{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:3px 10px;
+    font-size:13px;
+}
+
+.ranking-item small{
+    color:#64748b;
+}
+
+.compare-controls{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px;
+    margin-bottom:8px;
+}
+
+.compare-controls select,
+.compare-controls button{
+    padding:7px 8px;
+}
+
+.compare-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:8px;
+}
+
+.tag{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:#111827;
     border:1px solid #1f2937;
-    padding:10px;
-    border-radius:8px;
+    border-radius:999px;
+    padding:5px 8px;
+    font-size:12px;
+    color:#cbd5e1;
+}
+
+.tag button{
+    border:0;
+    background:transparent;
+    color:#94a3b8;
+    padding:0;
+}
+
+.compare-chart-box{
+    height:145px;
+}
+
+.note{
+    color:#64748b;
+    font-size:12px;
+    line-height:1.45;
+}
+
+@media(max-width:1180px){
+    body{
+        overflow:auto;
+        height:auto;
+        min-height:100vh;
+    }
+
+    .container{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar,
+    .right{
+        border:0;
+        border-bottom:1px solid #1f2937;
+    }
+
+    .main{
+        height:680px;
+    }
+
+    .header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .market-status{
+        text-align:left;
+    }
 }
 </style>
 </head>
@@ -204,291 +548,1190 @@ canvas:active{cursor:grabbing;}
 <body>
 
 <div class="header">
-    <div class="logo">📊 Home Broker PRO</div>
+    <div class="brand">
+        <div class="logo">Market Watch PRO</div>
+        <div class="subtitle">Ações, cripto, moedas e índices em um só painel</div>
+    </div>
+
+    <div class="market-status">Mercado <strong id="marketStatus">monitorando</strong></div>
 
     <div class="header-right">
         <select id="intervalSelect" onchange="changeInterval()">
             <option value="5000">5s</option>
-            <option value="10000">10s</option>
+            <option value="10000" selected>10s</option>
             <option value="30000">30s</option>
             <option value="60000">1m</option>
+            <option value="300000">5m</option>
         </select>
 
         <select id="chartType" onchange="changeChartType()">
+            <option value="candlestick" selected>Velas</option>
             <option value="line">Linha</option>
-            <option value="candlestick">Vela</option>
         </select>
+
+        <button onclick="resetZoom()">Resetar zoom</button>
     </div>
 </div>
 
 <div class="container">
 
-<div class="sidebar">
-    <div class="sidebar-title" onclick="toggleStocks()">📈 Ações</div>
+    <div class="sidebar">
+        <div class="sidebar-title">
+            <span>Ativos</span>
+            <span id="watchlistStatus">--</span>
+        </div>
 
-    <div id="stockList">
-        <div class="stock-item active" onclick="selectStock('PETR4.SA','PETR4',event)">PETR4</div>
-        <div class="stock-item" onclick="selectStock('VALE3.SA','VALE3',event)">VALE3</div>
-        <div class="stock-item" onclick="selectStock('ITUB4.SA','ITUB4',event)">ITUB4</div>
-        <div class="stock-item" onclick="selectStock('AAPL','AAPL',event)">AAPL</div>
-        <div class="stock-item" onclick="selectStock('TSLA','TSLA',event)">TSLA</div>
-    </div>
-</div>
+        <div class="search-row">
+            <input id="assetSearch" type="text" placeholder="Buscar ou digitar símbolo. Ex: MCD, BTC-USD, USDBRL=X" oninput="renderWatchlist()" onkeydown="handleSearchKey(event)">
+            <button onclick="addCustomSymbol()">Adicionar</button>
+        </div>
 
-<div class="main">
+        <div class="category-tabs" id="categoryTabs"></div>
 
-    <div class="top-info">
-        <h2 id="symbol">PETR4</h2>
-        <div class="price" id="price">--</div>
+        <div id="stockList"></div>
     </div>
 
-    <div class="chart-box">
-        <canvas id="chart"></canvas>
+    <div class="main">
+        <div class="top-info">
+            <div class="asset-info">
+                <h2 id="symbol">PETR4</h2>
+                <div class="asset-meta" id="fullSymbol">PETR4.SA</div>
+            </div>
 
-        <!-- BARRA -->
-        <div class="trade-bar">
-            <div class="trade-line"></div>
-
-            <div class="trade-info">
-                <div class="percent top">45%</div>
-
-                <div class="bar">
-                    <div class="green"></div>
-                    <div class="red"></div>
-                </div>
-
-                <div class="percent bottom">55%</div>
+            <div class="price-box">
+                <div class="price neutral" id="price">--</div>
+                <div class="variation neutral" id="variation">--</div>
             </div>
         </div>
 
+        <div class="toolbar">
+            <div class="timeframe-bar">
+                <button class="tf-btn active" data-timeframe="1m" onclick="changeTimeframe('1m',event)">1m</button>
+                <button class="tf-btn" data-timeframe="5m" onclick="changeTimeframe('5m',event)">5m</button>
+                <button class="tf-btn" data-timeframe="15m" onclick="changeTimeframe('15m',event)">15m</button>
+                <button class="tf-btn" data-timeframe="1h" onclick="changeTimeframe('1h',event)">1h</button>
+                <button class="tf-btn" data-timeframe="1d" onclick="changeTimeframe('1d',event)">1d</button>
+            </div>
+
+            <div class="indicator-bar">
+                <button id="toggleMa9" class="indicator-toggle active" onclick="toggleIndicator('ma9')"><i class="indicator-dot ma9-dot"></i>MM9</button>
+                <button id="toggleMa21" class="indicator-toggle active" onclick="toggleIndicator('ma21')"><i class="indicator-dot ma21-dot"></i>MM21</button>
+                <button id="toggleBollinger" class="indicator-toggle" onclick="toggleIndicator('bollinger')"><i class="indicator-dot bb-dot"></i>Bollinger</button>
+                <button id="toggleVwap" class="indicator-toggle" onclick="toggleIndicator('vwap')"><i class="indicator-dot vwap-dot"></i>VWAP</button>
+            </div>
+        </div>
+
+        <div class="chart-stack">
+            <div class="chart-box">
+                <canvas id="chart"></canvas>
+
+                <div class="trade-bar">
+                    <div class="trade-line"></div>
+
+                    <div class="trade-info">
+                        <div class="percent top">50%</div>
+
+                        <div class="bar">
+                            <div class="green"></div>
+                            <div class="red"></div>
+                        </div>
+
+                        <div class="percent bottom">50%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="volume-box">
+                <canvas id="volumeChart"></canvas>
+            </div>
+        </div>
     </div>
 
-</div>
+    <div class="right">
+        <div class="panel">
+            <div class="panel-title">Resumo</div>
 
-<div class="right">
-    <div class="panel">
-        <div>Última atualização</div>
-        <div id="time">--</div>
+            <div class="info-row"><span>Última atualização</span><strong id="time">--</strong></div>
+            <div class="info-row"><span>Abertura</span><strong id="openPrice">--</strong></div>
+            <div class="info-row"><span>Máxima</span><strong id="highPrice">--</strong></div>
+            <div class="info-row"><span>Mínima</span><strong id="lowPrice">--</strong></div>
+            <div class="info-row"><span>Fechamento ant.</span><strong id="previousPrice">--</strong></div>
+            <div class="info-row"><span>Variação</span><strong id="sideVariation">--</strong></div>
+            <div class="info-row"><span>Volume</span><strong id="volume">--</strong></div>
+            <div class="info-row"><span>Status</span><strong class="status" id="status">Carregando</strong></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Indicadores</div>
+
+            <div class="info-row"><span>MM9</span><strong id="ma9Value">--</strong></div>
+            <div class="info-row"><span>MM21</span><strong id="ma21Value">--</strong></div>
+            <div class="info-row"><span>VWAP</span><strong id="vwapValue">--</strong></div>
+            <div class="info-row"><span>RSI 14</span><strong id="rsiValue">--</strong></div>
+            <div class="info-row"><span>MACD</span><strong id="macdValue">--</strong></div>
+            <div class="info-row"><span>Tendência curta</span><strong id="trend">--</strong></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Ranking</div>
+            <div class="rank-tabs">
+                <button id="rank-high" class="rank-btn active" onclick="setRankingMode('high')">Altas</button>
+                <button id="rank-low" class="rank-btn" onclick="setRankingMode('low')">Baixas</button>
+                <button id="rank-volume" class="rank-btn" onclick="setRankingMode('volume')">Volume</button>
+            </div>
+            <div class="ranking-list" id="rankingList"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Comparar ativos</div>
+            <div class="compare-controls">
+                <select id="compareSelect"></select>
+                <button onclick="addCompareSymbol()">Adicionar</button>
+            </div>
+            <div class="compare-tags" id="compareTags"></div>
+            <div class="compare-chart-box">
+                <canvas id="compareChart"></canvas>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Força do mercado</div>
+            <div class="info-row"><span>Alta</span><strong id="buyPower">50%</strong></div>
+            <div class="info-row"><span>Baixa</span><strong id="sellPower">50%</strong></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Observação</div>
+            <p class="note">Painel informativo para acompanhamento de mercado. Os dados vêm do Yahoo Finance via yfinance e podem ter atraso, indisponibilidade ou variação conforme o ativo.</p>
+        </div>
     </div>
-</div>
 
 </div>
 
 <script>
-let chart;
-let currentSymbol='PETR4.SA';
-let intervalTime=5000;
-let intervalId;
-let chartType='line';
+const FALLBACK_ASSETS = [
+    {symbol:'PETR4.SA', name:'PETR4', market:'BR', category:'Brasil', assetClass:'stock'},
+    {symbol:'VALE3.SA', name:'VALE3', market:'BR', category:'Brasil', assetClass:'stock'},
+    {symbol:'ITUB4.SA', name:'ITUB4', market:'BR', category:'Brasil', assetClass:'stock'},
+    {symbol:'AAPL', name:'Apple', market:'EUA', category:'EUA', assetClass:'stock'},
+    {symbol:'MSFT', name:'Microsoft', market:'EUA', category:'EUA', assetClass:'stock'},
+    {symbol:'NVDA', name:'NVIDIA', market:'EUA', category:'EUA', assetClass:'stock'},
+    {symbol:'MCD', name:"McDonald's", market:'EUA', category:'EUA', assetClass:'stock'},
+    {symbol:'BTC-USD', name:'Bitcoin', market:'Crypto', category:'Cripto', assetClass:'crypto'},
+    {symbol:'ETH-USD', name:'Ethereum', market:'Crypto', category:'Cripto', assetClass:'crypto'},
+    {symbol:'USDBRL=X', name:'Dolar/Real', market:'FX', category:'Moedas', assetClass:'fx'},
+    {symbol:'EURBRL=X', name:'Euro/Real', market:'FX', category:'Moedas', assetClass:'fx'},
+    {symbol:'^BVSP', name:'Ibovespa', market:'Indice', category:'Indices', assetClass:'index'}
+];
 
-let priceHistory=[];
-let candles=[];
+const PREF_KEY = 'market-watch-pro-preferences-v2';
+const indicatorColors = {
+    ma9:'#38bdf8',
+    ma21:'#f59e0b',
+    bollinger:'#a78bfa',
+    vwap:'#f472b6'
+};
+const compareColors = ['#22c55e','#38bdf8','#f59e0b','#f472b6','#a78bfa','#fb7185'];
+
+let chart;
+let volumeChart;
+let compareChart;
+let baseAssets = [...FALLBACK_ASSETS];
+let watchlistItems = [...FALLBACK_ASSETS];
+let customAssets = [];
+let compareSymbols = [];
+let rankingMode = 'high';
+let selectedCategory = 'Todos';
+
+let currentSymbol = 'PETR4.SA';
+let currentName = 'PETR4';
+let currentMarket = 'BR';
+let currentAssetClass = 'stock';
+let currentTimeframe = '1m';
+let intervalTime = 10000;
+let intervalId;
+let watchlistIntervalId;
+let chartType = 'candlestick';
+
+let candles = [];
+let priceHistory = [];
+let ma9 = [];
+let ma21 = [];
+let bollinger = {upper:[], middle:[], lower:[]};
+let vwap = [];
+let rsi = [];
+let macd = {line:[], signal:[], histogram:[]};
+let lastIndicators = {};
+
+let indicators = {
+    ma9:true,
+    ma21:true,
+    bollinger:false,
+    vwap:false
+};
+
+if(window.ChartZoom){
+    Chart.register(window.ChartZoom);
+}
 
 if(window['chartjs-plugin-zoom']){
     Chart.register(window['chartjs-plugin-zoom']);
 }
 
-function toggleStocks(){
-    const el=document.getElementById('stockList');
-    el.style.display=el.style.display==='none'?'block':'none';
+function loadPreferences(){
+    try{
+        const saved = JSON.parse(localStorage.getItem(PREF_KEY) || '{}');
+        currentSymbol = saved.currentSymbol || currentSymbol;
+        currentName = saved.currentName || currentName;
+        currentTimeframe = saved.currentTimeframe || currentTimeframe;
+        chartType = saved.chartType || chartType;
+        intervalTime = saved.intervalTime || intervalTime;
+        selectedCategory = saved.selectedCategory || selectedCategory;
+        indicators = {...indicators, ...(saved.indicators || {})};
+        customAssets = Array.isArray(saved.customAssets) ? saved.customAssets : [];
+        compareSymbols = Array.isArray(saved.compareSymbols) ? saved.compareSymbols.slice(0,4) : [];
+    }catch(error){
+        console.warn('Preferências ignoradas:', error);
+    }
 }
 
-function destroyChart(){
-    if(chart) chart.destroy();
+function savePreferences(){
+    localStorage.setItem(PREF_KEY, JSON.stringify({
+        currentSymbol,
+        currentName,
+        currentTimeframe,
+        chartType,
+        intervalTime,
+        selectedCategory,
+        indicators,
+        customAssets,
+        compareSymbols
+    }));
 }
 
-function createLineChart(){
-    const ctx=document.getElementById('chart').getContext('2d');
+function mergeAssets(){
+    const map = new Map();
 
-    chart=new Chart(ctx,{
-        type:'line',
-        data:{
-            labels:priceHistory.map((_,i)=>i),
-            datasets:[{
-                data:priceHistory,
-                borderColor:'#22c55e',
-                borderWidth:1.5,
-                tension:0.2,
-                fill:true,
-                backgroundColor:'rgba(34,197,94,0.05)'
-            }]
-        },
-        options:{
-            responsive:true,
-            maintainAspectRatio:false,
-            animation:false,
-            plugins:{
-                zoom:{
-                    pan:{enabled:true,mode:'x'},
-                    zoom:{wheel:{enabled:true},mode:'x'}
-                },
-                legend:{display:false}
-            },
-            scales:{
-                x:{display:false},
-                y:{
-                    display:false,
-                    grace:'5%'
-                }
-            }
+    [...baseAssets, ...customAssets].forEach(asset => {
+        if(asset && asset.symbol){
+            map.set(asset.symbol, asset);
+        }
+    });
+
+    return [...map.values()];
+}
+
+function inferAsset(symbol){
+    symbol = symbol.trim().toUpperCase();
+    const known = mergeAssets().find(item => item.symbol === symbol);
+
+    if(known) return known;
+    if(symbol.endsWith('.SA')) return {symbol, name:symbol.replace('.SA',''), market:'BR', category:'Brasil', assetClass:'stock'};
+    if(symbol.endsWith('-USD')) return {symbol, name:symbol.replace('-USD',''), market:'Crypto', category:'Cripto', assetClass:'crypto'};
+    if(symbol.endsWith('=X')) return {symbol, name:symbol.replace('=X',''), market:'FX', category:'Moedas', assetClass:'fx'};
+    if(symbol.startsWith('^')) return {symbol, name:symbol, market:'Indice', category:'Indices', assetClass:'index'};
+    return {symbol, name:symbol, market:'EUA', category:'EUA', assetClass:'stock'};
+}
+
+function getCurrencyPrefix(symbol = currentSymbol, assetClass = currentAssetClass){
+    if(assetClass === 'fx' || symbol.endsWith('=X') || assetClass === 'index') return '';
+    if(symbol.endsWith('.SA')) return 'R$ ';
+    return 'US$ ';
+}
+
+function formatValue(value, symbol = currentSymbol, assetClass = currentAssetClass){
+    if(typeof value !== 'number' || Number.isNaN(value)){
+        return '--';
+    }
+
+    const decimals = assetClass === 'fx' || symbol.endsWith('=X') ? 4 : 2;
+    return getCurrencyPrefix(symbol, assetClass) + value.toLocaleString('pt-BR', {
+        minimumFractionDigits:decimals,
+        maximumFractionDigits:decimals
+    });
+}
+
+function formatNumber(value){
+    if(typeof value !== 'number' || Number.isNaN(value)){
+        return '--';
+    }
+
+    return value.toLocaleString('pt-BR');
+}
+
+function formatPercent(value){
+    if(typeof value !== 'number' || Number.isNaN(value)){
+        return '--';
+    }
+
+    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+}
+
+function directionClass(value){
+    if(value > 0) return 'up';
+    if(value < 0) return 'down';
+    return 'neutral';
+}
+
+function formatTime(value){
+    const date = new Date(value);
+
+    if(currentTimeframe === '1d'){
+        return date.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+    }
+
+    return date.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+}
+
+function setStatus(text, type){
+    const el = document.getElementById('status');
+    el.innerText = text;
+    el.className = 'status ' + type;
+}
+
+function updateMarketStatus(){
+    const now = new Date();
+    const day = now.getDay();
+    const minutes = now.getHours() * 60 + now.getMinutes();
+    const isWeekday = day >= 1 && day <= 5;
+    let text = 'Fechado';
+    let className = 'down';
+
+    if(currentAssetClass === 'crypto'){
+        text = 'Cripto 24h';
+        className = 'up';
+    }else if(currentAssetClass === 'fx'){
+        text = isWeekday ? 'Moedas ativo' : 'Moedas fechado';
+        className = isWeekday ? 'up' : 'down';
+    }else if(currentMarket === 'BR'){
+        const open = isWeekday && minutes >= 10 * 60 && minutes <= 18 * 60;
+        text = open ? 'B3 aberta' : 'B3 fechada';
+        className = open ? 'up' : 'down';
+    }else if(currentMarket === 'EUA'){
+        const open = isWeekday && minutes >= 10 * 60 + 30 && minutes <= 17 * 60;
+        text = open ? 'EUA aberto' : 'EUA fechado';
+        className = open ? 'up' : 'down';
+    }else{
+        text = 'Status estimado';
+        className = 'neutral';
+    }
+
+    document.getElementById('marketStatus').innerHTML = `<strong class="${className}">${text}</strong>`;
+}
+
+function applyControlsFromState(){
+    document.getElementById('chartType').value = chartType;
+    document.getElementById('intervalSelect').value = String(intervalTime);
+
+    document.querySelectorAll('.tf-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.timeframe === currentTimeframe);
+    });
+
+    Object.entries(indicators).forEach(([key, value]) => {
+        const el = document.getElementById('toggle' + key.charAt(0).toUpperCase() + key.slice(1));
+        if(el){
+            el.classList.toggle('active', value);
         }
     });
 }
 
-function createCandleChart(){
-    const ctx=document.getElementById('chart').getContext('2d');
+function renderCategoryTabs(){
+    const categories = ['Todos', ...new Set(mergeAssets().map(item => item.category))];
+    document.getElementById('categoryTabs').innerHTML = categories.map(category => (
+        `<button class="cat-btn ${category === selectedCategory ? 'active' : ''}" onclick="setCategory('${category}')">${category}</button>`
+    )).join('');
+}
 
-    chart=new Chart(ctx,{
-        type:'line',
-        data:{
-            labels:candles.map(c=>c.x),
-            datasets:[{
-                data:candles.map(c=>c.c),
-                borderWidth:0,
-                pointRadius:0
-            }]
-        },
-        options:{
-            responsive:true,
-            maintainAspectRatio:false,
-            animation:false,
-            plugins:{legend:{display:false}},
-            scales:{
-                x:{display:false},
-                y:{
-                    display:false,
-                    grace:'5%'
-                }
-            }
-        },
-        plugins:[{
-            id:'candles_draw',
-            afterDatasetsDraw(chart){
-                const ctx=chart.ctx;
-                const xScale=chart.scales.x;
-                const yScale=chart.scales.y;
+function setCategory(category){
+    selectedCategory = category;
+    renderCategoryTabs();
+    renderWatchlist();
+    savePreferences();
+}
 
-                candles.forEach(c=>{
-                    const x=xScale.getPixelForValue(c.x);
-                    const yO=yScale.getPixelForValue(c.o);
-                    const yC=yScale.getPixelForValue(c.c);
-                    const yH=yScale.getPixelForValue(c.h);
-                    const yL=yScale.getPixelForValue(c.l);
+function sparklineSvg(values, trend){
+    if(!Array.isArray(values) || values.length < 2){
+        return '<svg class="spark"></svg>';
+    }
 
-                    const color=c.c>=c.o?'#22c55e':'#ef4444';
+    const width = 260;
+    const height = 26;
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = max - min || 1;
+    const points = values.map((value, index) => {
+        const x = (index / (values.length - 1)) * width;
+        const y = height - ((value - min) / span) * (height - 4) - 2;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const color = trend >= 0 ? '#22c55e' : '#ef4444';
 
-                    ctx.strokeStyle=color;
-                    ctx.fillStyle=color;
+    return `<svg class="spark" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+        <polyline points="${points}" fill="none" stroke="${color}" stroke-width="2" opacity="0.9"/>
+    </svg>`;
+}
 
-                    ctx.beginPath();
-                    ctx.moveTo(x,yH);
-                    ctx.lineTo(x,yL);
-                    ctx.stroke();
+function jsArgs(...values){
+    return values.map(value => JSON.stringify(value)).join(',');
+}
 
-                    ctx.fillRect(x-3,Math.min(yO,yC),6,Math.abs(yO-yC));
-                });
-            }
-        }]
+function renderWatchlist(items = watchlistItems){
+    const query = document.getElementById('assetSearch').value.trim().toUpperCase();
+    const filtered = items.filter(item => {
+        const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;
+        const matchesQuery = !query || item.symbol.includes(query) || item.name.toUpperCase().includes(query);
+        return matchesCategory && matchesQuery;
     });
+
+    document.getElementById('stockList').innerHTML = filtered.map(item => {
+        const change = typeof item.changePercent === 'number' ? item.changePercent : 0;
+        const changeClass = directionClass(change);
+        const activeClass = item.symbol === currentSymbol ? ' active' : '';
+        const price = typeof item.price === 'number' ? formatValue(item.price, item.symbol, item.assetClass) : '--';
+        const percent = typeof item.changePercent === 'number' ? formatPercent(item.changePercent) : '--';
+
+        return `
+            <div class="stock-item${activeClass}" onclick='selectStock(${jsArgs(item.symbol,item.name)},event)'>
+                <div>
+                    <div class="stock-name">${item.name}</div>
+                    <div class="stock-symbol">${item.symbol}</div>
+                    <div class="stock-market">${item.category} · ${item.market}</div>
+                </div>
+                <div>
+                    <div class="stock-price">${price}</div>
+                    <div class="stock-change ${changeClass}">${percent}</div>
+                </div>
+                ${sparklineSvg(item.sparkline, change)}
+            </div>
+        `;
+    }).join('');
+
+    renderCompareSelect();
 }
 
-function rebuild(){
-    destroyChart();
-    if(chartType==='candlestick') createCandleChart();
-    else createLineChart();
+function handleSearchKey(event){
+    if(event.key === 'Enter'){
+        addCustomSymbol();
+    }
 }
 
-function selectStock(symbol,name,e){
-    currentSymbol=symbol;
-    document.getElementById('symbol').innerText=name;
+async function addCustomSymbol(){
+    const input = document.getElementById('assetSearch');
+    const symbol = input.value.trim().toUpperCase();
 
-    document.querySelectorAll('.stock-item').forEach(el=>el.classList.remove('active'));
-    e.target.classList.add('active');
+    if(!symbol){
+        return;
+    }
 
+    setStatus('Buscando ativo', 'status');
+
+    try{
+        const data = await fetchStockData(symbol);
+        const asset = {
+            symbol:data.symbol,
+            name:data.name || inferAsset(symbol).name,
+            market:data.market || inferAsset(symbol).market,
+            category:data.category || inferAsset(symbol).category,
+            assetClass:data.assetClass || inferAsset(symbol).assetClass,
+            price:data.price,
+            change:data.change,
+            changePercent:data.changePercent,
+            volume:data.volume,
+            sparkline:data.sparkline || data.history || []
+        };
+
+        if(!mergeAssets().some(item => item.symbol === asset.symbol)){
+            customAssets.push(asset);
+        }
+
+        input.value = '';
+        renderCategoryTabs();
+        renderWatchlist([...watchlistItems, asset]);
+        selectStock(asset.symbol, asset.name);
+        savePreferences();
+    }catch(error){
+        console.error(error);
+        setStatus('Ativo não encontrado', 'error');
+        alert('Não consegui encontrar esse símbolo no Yahoo Finance.');
+    }
+}
+
+async function fetchStockData(symbol = currentSymbol){
+    const params = new URLSearchParams({
+        symbol,
+        timeframe:currentTimeframe
+    });
+    const res = await fetch(`/api/stock?${params.toString()}`);
+
+    if(!res.ok){
+        throw new Error('Erro na API: ' + res.status);
+    }
+
+    const data = await res.json();
+
+    if(typeof data.price !== 'number' || !Array.isArray(data.candles)){
+        throw new Error('Resposta inválida da API');
+    }
+
+    return data;
+}
+
+async function loadAssets(){
+    try{
+        const res = await fetch('/api/assets');
+        const data = await res.json();
+
+        if(Array.isArray(data.items)){
+            baseAssets = data.items;
+        }
+    }catch(error){
+        console.warn('Usando lista local de ativos:', error);
+    }
+
+    renderCategoryTabs();
+    renderCompareSelect();
+}
+
+async function loadWatchlist(){
+    document.getElementById('watchlistStatus').innerText = '...';
+
+    try{
+        const symbols = mergeAssets().map(item => item.symbol).join(',');
+        const params = new URLSearchParams({
+            timeframe:currentTimeframe,
+            symbols
+        });
+        const res = await fetch(`/api/watchlist?${params.toString()}`);
+        const data = await res.json();
+
+        watchlistItems = data.items || mergeAssets();
+        renderWatchlist();
+        renderRanking();
+        document.getElementById('watchlistStatus').innerText = 'online';
+    }catch(error){
+        console.error(error);
+        watchlistItems = mergeAssets();
+        renderWatchlist();
+        document.getElementById('watchlistStatus').innerText = 'erro';
+    }
+}
+
+function selectStock(symbol, name, event){
+    const asset = inferAsset(symbol);
+    currentSymbol = symbol;
+    currentName = name || asset.name;
+    currentMarket = asset.market;
+    currentAssetClass = asset.assetClass;
+
+    document.getElementById('symbol').innerText = currentName;
+    document.getElementById('fullSymbol').innerText = `${currentSymbol} · ${asset.category} · ${asset.market}`;
+
+    document.querySelectorAll('.stock-item').forEach(el => el.classList.remove('active'));
+    if(event && event.currentTarget){
+        event.currentTarget.classList.add('active');
+    }
+
+    candles = [];
+    priceHistory = [];
+    ma9 = [];
+    ma21 = [];
+    bollinger = {upper:[], middle:[], lower:[]};
+    vwap = [];
+    rsi = [];
+    macd = {line:[], signal:[], histogram:[]};
+
+    savePreferences();
     loadStock();
 }
 
 async function loadStock(){
-    const res=await fetch(`/api/stock?symbol=${currentSymbol}`);
-    const data=await res.json();
+    setStatus('Carregando', 'status');
 
-    priceHistory=data.history;
-    candles=[];
-
-    for(let i=1;i<priceHistory.length;i++){
-        const o=priceHistory[i-1];
-        const c=priceHistory[i];
-        candles.push({
-            x:i,
-            o,
-            h:Math.max(o,c)+Math.random()*0.5,
-            l:Math.min(o,c)-Math.random()*0.5,
-            c
-        });
+    try{
+        const data = await fetchStockData(currentSymbol);
+        applyMarketData(data);
+        rebuild();
+        updateAllInfo(data);
+        setStatus('Online', 'ok');
+    }catch(error){
+        console.error(error);
+        setStatus('Erro na API', 'error');
+        document.getElementById('price').innerText = 'Erro';
     }
-
-    rebuild();
-    document.getElementById('price').innerText='R$ '+data.price.toFixed(2);
 }
 
 async function updateStock(){
-    const res=await fetch(`/api/stock?symbol=${currentSymbol}`);
-    const data=await res.json();
+    try{
+        const data = await fetchStockData(currentSymbol);
+        applyMarketData(data);
+        updateCharts();
+        updateAllInfo(data);
+        setStatus('Online', 'ok');
+    }catch(error){
+        console.error(error);
+        setStatus('Erro na API', 'error');
+    }
+}
 
-    priceHistory.push(data.price);
-    if(priceHistory.length>80) priceHistory.shift();
+function applyMarketData(data){
+    candles = data.candles || [];
+    priceHistory = data.history || [];
+    ma9 = data.ma9 || [];
+    ma21 = data.ma21 || [];
+    bollinger = data.bollinger || {upper:[], middle:[], lower:[]};
+    vwap = data.vwap || [];
+    rsi = data.rsi || [];
+    macd = data.macd || {line:[], signal:[], histogram:[]};
+    lastIndicators = data.lastIndicators || {};
+    currentName = data.name || currentName;
+    currentMarket = data.market || inferAsset(currentSymbol).market;
+    currentAssetClass = data.assetClass || inferAsset(currentSymbol).assetClass;
 
-    const last=priceHistory[priceHistory.length-2]||data.price;
+    document.getElementById('symbol').innerText = currentName;
+    document.getElementById('fullSymbol').innerText = `${currentSymbol} · ${data.category || inferAsset(currentSymbol).category} · ${currentMarket}`;
+}
 
-    candles.push({
-        x:candles.length,
-        o:last,
-        c:data.price,
-        h:Math.max(last,data.price),
-        l:Math.min(last,data.price)
-    });
-
-    if(candles.length>80) candles.shift();
-
+function destroyCharts(){
     if(chart){
-        if(chartType==='line'){
-            chart.data.datasets[0].data=priceHistory;
-            chart.data.labels=priceHistory.map((_,i)=>i);
-        }else{
-            chart.data.datasets[0].data=candles.map(c=>c.c);
-            chart.data.labels=candles.map(c=>c.x);
-        }
-        chart.update();
-        chart.resize(); // 🔥 CORREÇÃO DO CORTE
+        chart.destroy();
+        chart = null;
     }
 
-    document.getElementById('price').innerText='R$ '+data.price.toFixed(2);
-    document.getElementById('time').innerText=new Date().toLocaleTimeString();
+    if(volumeChart){
+        volumeChart.destroy();
+        volumeChart = null;
+    }
+}
 
-    updateBar(Math.floor(Math.random()*100));
+function syncVolumeRange(){
+    if(!chart || !volumeChart || !chart.scales.x){
+        return;
+    }
+
+    volumeChart.options.scales.x.min = chart.scales.x.min;
+    volumeChart.options.scales.x.max = chart.scales.x.max;
+    volumeChart.update('none');
+}
+
+function getPriceLineData(){
+    return candles.map(candle => ({x:candle.x, y:candle.c}));
+}
+
+function getVolumeData(){
+    return candles.map(candle => ({
+        x:candle.x,
+        y:candle.v,
+        direction:candle.c >= candle.o ? 'up' : 'down'
+    }));
+}
+
+const overlayPlugin = {
+    id:'indicatorOverlay',
+    afterDatasetsDraw(chartInstance){
+        drawLineOverlay(chartInstance, ma9, indicatorColors.ma9, indicators.ma9, 1.35);
+        drawLineOverlay(chartInstance, ma21, indicatorColors.ma21, indicators.ma21, 1.35);
+        drawLineOverlay(chartInstance, vwap, indicatorColors.vwap, indicators.vwap, 1.25);
+
+        if(indicators.bollinger){
+            drawLineOverlay(chartInstance, bollinger.upper || [], indicatorColors.bollinger, true, 1, [5,4]);
+            drawLineOverlay(chartInstance, bollinger.middle || [], 'rgba(167,139,250,0.45)', true, 1, [3,4]);
+            drawLineOverlay(chartInstance, bollinger.lower || [], indicatorColors.bollinger, true, 1, [5,4]);
+        }
+    }
+};
+
+function drawLineOverlay(chartInstance, data, color, visible, width = 1.2, dash = []){
+    if(!visible || !Array.isArray(data) || !data.length){
+        return;
+    }
+
+    const ctx = chartInstance.ctx;
+    const xScale = chartInstance.scales.x;
+    const yScale = chartInstance.scales.y;
+    const area = chartInstance.chartArea;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(area.left, area.top, area.right - area.left, area.bottom - area.top);
+    ctx.clip();
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash);
+
+    let started = false;
+
+    data.forEach(point => {
+        if(typeof point.x !== 'number' || typeof point.y !== 'number') return;
+
+        const x = xScale.getPixelForValue(point.x);
+        const y = yScale.getPixelForValue(point.y);
+
+        if(!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+        if(!started){
+            ctx.moveTo(x,y);
+            started = true;
+        }else{
+            ctx.lineTo(x,y);
+        }
+    });
+
+    ctx.stroke();
+    ctx.restore();
+}
+
+function getPriceOptions(){
+    return {
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:false,
+        normalized:true,
+        parsing:false,
+        interaction:{intersect:false, mode:'index'},
+        plugins:{
+            zoom:{
+                pan:{enabled:true, mode:'x', onPan:syncVolumeRange},
+                zoom:{wheel:{enabled:true, speed:0.08}, pinch:{enabled:true}, mode:'x', onZoom:syncVolumeRange},
+                limits:{x:{minRange:1000 * 60 * 8}}
+            },
+            legend:{display:false},
+            tooltip:{
+                enabled:true,
+                callbacks:{
+                    title(items){
+                        const raw = items[0].raw;
+                        const timestamp = raw && raw.x ? raw.x : items[0].parsed.x;
+                        return new Date(timestamp).toLocaleString('pt-BR');
+                    },
+                    label(context){
+                        if(chartType === 'line'){
+                            return 'Preço: ' + formatValue(context.raw.y);
+                        }
+
+                        const item = context.raw;
+                        return [
+                            'Abertura: ' + formatValue(item.o),
+                            'Máxima: ' + formatValue(item.h),
+                            'Mínima: ' + formatValue(item.l),
+                            'Fechamento: ' + formatValue(item.c),
+                            'Volume: ' + formatNumber(item.v)
+                        ];
+                    }
+                }
+            }
+        },
+        scales:{
+            x:{type:'linear', display:false, grid:{color:'rgba(148,163,184,0.06)'}},
+            y:{
+                position:'right',
+                display:true,
+                grace:'5%',
+                border:{display:false},
+                grid:{color:'rgba(148,163,184,0.08)'},
+                ticks:{
+                    color:'#64748b',
+                    padding:8,
+                    callback(value){
+                        return Number(value).toFixed(currentAssetClass === 'fx' ? 4 : 2);
+                    }
+                }
+            }
+        }
+    };
+}
+
+function getVolumeOptions(){
+    return {
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:false,
+        parsing:false,
+        plugins:{
+            legend:{display:false},
+            tooltip:{
+                callbacks:{
+                    title(items){
+                        return new Date(items[0].raw.x).toLocaleString('pt-BR');
+                    },
+                    label(context){
+                        return 'Volume: ' + formatNumber(context.raw.y);
+                    }
+                }
+            }
+        },
+        scales:{
+            x:{
+                type:'linear',
+                grid:{color:'rgba(148,163,184,0.04)'},
+                ticks:{color:'#64748b', maxTicksLimit:6, callback(value){return formatTime(value);}}
+            },
+            y:{display:false, beginAtZero:true, grace:'8%'}
+        }
+    };
+}
+
+function createPriceChart(){
+    const ctx = document.getElementById('chart').getContext('2d');
+    const mainDataset = chartType === 'line'
+        ? {
+            label:'Preço',
+            type:'line',
+            data:getPriceLineData(),
+            borderColor:'#22c55e',
+            borderWidth:1.7,
+            tension:0.25,
+            fill:true,
+            pointRadius:0,
+            backgroundColor:'rgba(34,197,94,0.06)'
+        }
+        : {
+            label:'Preço',
+            data:candles,
+            color:{up:'#22c55e', down:'#ef4444', unchanged:'#94a3b8'},
+            borderColor:{up:'#22c55e', down:'#ef4444', unchanged:'#94a3b8'},
+            backgroundColor:{up:'rgba(34,197,94,0.78)', down:'rgba(239,68,68,0.78)', unchanged:'rgba(148,163,184,0.78)'},
+            borderWidth:1,
+            barPercentage:0.72,
+            categoryPercentage:0.9
+        };
+
+    chart = new Chart(ctx,{
+        type:chartType === 'line' ? 'line' : 'candlestick',
+        data:{datasets:[mainDataset]},
+        options:getPriceOptions(),
+        plugins:[overlayPlugin]
+    });
+}
+
+function createVolumeChart(){
+    const ctx = document.getElementById('volumeChart').getContext('2d');
+
+    volumeChart = new Chart(ctx,{
+        type:'bar',
+        data:{
+            datasets:[{
+                label:'Volume',
+                data:getVolumeData(),
+                backgroundColor(context){
+                    const raw = context.raw;
+                    return raw && raw.direction === 'up' ? 'rgba(34,197,94,0.48)' : 'rgba(239,68,68,0.48)';
+                },
+                borderWidth:0,
+                barPercentage:0.8,
+                categoryPercentage:1
+            }]
+        },
+        options:getVolumeOptions()
+    });
+}
+
+function rebuild(){
+    destroyCharts();
+    createPriceChart();
+    createVolumeChart();
+}
+
+function updateCharts(){
+    if(!chart || !volumeChart){
+        rebuild();
+        return;
+    }
+
+    chart.data.datasets[0].data = chartType === 'line' ? getPriceLineData() : candles;
+    volumeChart.data.datasets[0].data = getVolumeData();
+    chart.update('none');
+    volumeChart.update('none');
+    syncVolumeRange();
+}
+
+function toggleIndicator(key){
+    indicators[key] = !indicators[key];
+    applyControlsFromState();
+    savePreferences();
+
+    if(chart){
+        chart.update('none');
+    }
+}
+
+function changeTimeframe(timeframe, event){
+    currentTimeframe = timeframe;
+    document.querySelectorAll('.tf-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    savePreferences();
+    loadStock();
+    loadWatchlist();
+    loadCompareData();
 }
 
 function changeChartType(){
-    chartType=document.getElementById('chartType').value;
+    chartType = document.getElementById('chartType').value;
+    savePreferences();
     rebuild();
 }
 
 function changeInterval(){
-    intervalTime=parseInt(document.getElementById('intervalSelect').value);
+    intervalTime = parseInt(document.getElementById('intervalSelect').value, 10);
+    savePreferences();
     clearInterval(intervalId);
-    intervalId=setInterval(updateStock,intervalTime);
+    intervalId = setInterval(updateStock, intervalTime);
+}
+
+function resetZoom(){
+    if(chart && typeof chart.resetZoom === 'function') chart.resetZoom();
+    if(volumeChart && typeof volumeChart.resetZoom === 'function') volumeChart.resetZoom();
+
+    if(volumeChart){
+        delete volumeChart.options.scales.x.min;
+        delete volumeChart.options.scales.x.max;
+        volumeChart.update('none');
+    }
+}
+
+function updateAllInfo(data){
+    updateInfo(data);
+    updateStats(data);
+    updateIndicators(data);
+    updateTime();
+    updateMarketPower(data.changePercent);
+    updateMarketStatus();
+}
+
+function updateInfo(data){
+    const diff = typeof data.change === 'number' ? data.change : 0;
+    const percent = typeof data.changePercent === 'number' ? data.changePercent : 0;
+    const trend = directionClass(diff);
+    const text = `${diff >= 0 ? '+' : ''}${formatValue(diff)} (${formatPercent(percent)})`;
+
+    document.getElementById('price').innerText = formatValue(data.price);
+    document.getElementById('price').className = 'price ' + trend;
+    document.getElementById('variation').innerText = text;
+    document.getElementById('variation').className = 'variation ' + trend;
+    document.getElementById('sideVariation').innerText = text;
+    document.getElementById('sideVariation').className = trend;
+}
+
+function updateStats(data){
+    document.getElementById('openPrice').innerText = formatValue(data.open);
+    document.getElementById('highPrice').innerText = formatValue(data.high);
+    document.getElementById('lowPrice').innerText = formatValue(data.low);
+    document.getElementById('previousPrice').innerText = formatValue(data.previousClose);
+    document.getElementById('volume').innerText = formatNumber(data.volume);
+}
+
+function updateIndicators(data){
+    const lastMa9 = ma9.length ? ma9[ma9.length - 1].y : null;
+    const lastMa21 = ma21.length ? ma21[ma21.length - 1].y : null;
+    const rsiValue = lastIndicators.rsi;
+    const macdValue = lastIndicators.macdHistogram;
+    const vwapValue = lastIndicators.vwap;
+
+    document.getElementById('ma9Value').innerText = formatValue(lastMa9);
+    document.getElementById('ma21Value').innerText = formatValue(lastMa21);
+    document.getElementById('vwapValue').innerText = formatValue(vwapValue);
+    document.getElementById('rsiValue').innerText = typeof rsiValue === 'number' ? rsiValue.toFixed(2) : '--';
+    document.getElementById('macdValue').innerText = typeof macdValue === 'number' ? macdValue.toFixed(4) : '--';
+
+    const trendEl = document.getElementById('trend');
+
+    if(typeof lastMa9 !== 'number' || typeof lastMa21 !== 'number'){
+        trendEl.innerText = '--';
+        trendEl.className = 'neutral';
+        return;
+    }
+
+    if(lastMa9 > lastMa21 && data.price > lastMa9){
+        trendEl.innerText = 'Alta';
+        trendEl.className = 'up';
+    }else if(lastMa9 < lastMa21 && data.price < lastMa9){
+        trendEl.innerText = 'Baixa';
+        trendEl.className = 'down';
+    }else{
+        trendEl.innerText = 'Lateral';
+        trendEl.className = 'neutral';
+    }
+}
+
+function updateMarketPower(changePercent){
+    let value = 50;
+
+    if(typeof changePercent === 'number'){
+        value = 50 + Math.max(-35, Math.min(35, changePercent * 8));
+    }
+
+    updateBar(Math.round(value));
 }
 
 function updateBar(value){
+    value = Math.max(0, Math.min(100, value));
     document.querySelector('.green').style.height = value + '%';
     document.querySelector('.red').style.height = (100 - value) + '%';
-
     document.querySelector('.top').innerText = value + '%';
     document.querySelector('.bottom').innerText = (100 - value) + '%';
+    document.getElementById('buyPower').innerText = value + '%';
+    document.getElementById('sellPower').innerText = (100 - value) + '%';
 }
 
-loadStock();
-intervalId=setInterval(updateStock,intervalTime);
+function updateTime(){
+    document.getElementById('time').innerText = new Date().toLocaleTimeString('pt-BR');
+}
+
+function setRankingMode(mode){
+    rankingMode = mode;
+    document.querySelectorAll('.rank-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('rank-' + mode).classList.add('active');
+    renderRanking();
+}
+
+function renderRanking(){
+    const valid = watchlistItems.filter(item => item.success && typeof item.price === 'number');
+    let sorted = [...valid];
+
+    if(rankingMode === 'high'){
+        sorted.sort((a,b) => (b.changePercent || 0) - (a.changePercent || 0));
+    }else if(rankingMode === 'low'){
+        sorted.sort((a,b) => (a.changePercent || 0) - (b.changePercent || 0));
+    }else{
+        sorted.sort((a,b) => (b.volume || 0) - (a.volume || 0));
+    }
+
+    document.getElementById('rankingList').innerHTML = sorted.slice(0,6).map(item => {
+        const value = rankingMode === 'volume' ? formatNumber(item.volume) : formatPercent(item.changePercent);
+        const cls = rankingMode === 'volume' ? 'neutral' : directionClass(item.changePercent || 0);
+
+        return `<div class="ranking-item" onclick='selectStock(${jsArgs(item.symbol,item.name)})'>
+            <strong>${item.name}</strong>
+            <strong class="${cls}">${value}</strong>
+            <small>${item.symbol}</small>
+            <small>${formatValue(item.price, item.symbol, item.assetClass)}</small>
+        </div>`;
+    }).join('');
+}
+
+function renderCompareSelect(){
+    const assets = mergeAssets();
+    document.getElementById('compareSelect').innerHTML = assets.map(item => (
+        `<option value="${item.symbol}">${item.name} · ${item.symbol}</option>`
+    )).join('');
+}
+
+function renderCompareTags(){
+    document.getElementById('compareTags').innerHTML = compareSymbols.map(symbol => {
+        const asset = inferAsset(symbol);
+        return `<span class="tag">${asset.name}<button onclick='removeCompareSymbol(${jsArgs(symbol)})'>x</button></span>`;
+    }).join('');
+}
+
+function addCompareSymbol(){
+    const symbol = document.getElementById('compareSelect').value;
+
+    if(!symbol || compareSymbols.includes(symbol)){
+        return;
+    }
+
+    compareSymbols.push(symbol);
+    compareSymbols = compareSymbols.slice(-5);
+    savePreferences();
+    renderCompareTags();
+    loadCompareData();
+}
+
+function removeCompareSymbol(symbol){
+    compareSymbols = compareSymbols.filter(item => item !== symbol);
+    savePreferences();
+    renderCompareTags();
+    loadCompareData();
+}
+
+function normalizeSeries(history){
+    if(!Array.isArray(history) || history.length < 2){
+        return [];
+    }
+
+    const first = history[0];
+    return history.map((value, index) => ({
+        x:index,
+        y:first ? ((value - first) / first) * 100 : 0
+    }));
+}
+
+async function loadCompareData(){
+    renderCompareTags();
+
+    if(compareChart){
+        compareChart.destroy();
+        compareChart = null;
+    }
+
+    if(!compareSymbols.length){
+        return;
+    }
+
+    const datasets = [];
+
+    for(const symbol of compareSymbols){
+        try{
+            const data = await fetchStockData(symbol);
+            const asset = inferAsset(symbol);
+            datasets.push({
+                label:asset.name,
+                data:normalizeSeries(data.history),
+                borderColor:compareColors[datasets.length % compareColors.length],
+                borderWidth:1.5,
+                pointRadius:0,
+                tension:0.25
+            });
+        }catch(error){
+            console.warn('Comparação ignorada:', symbol, error);
+        }
+    }
+
+    const ctx = document.getElementById('compareChart').getContext('2d');
+    compareChart = new Chart(ctx,{
+        type:'line',
+        data:{datasets},
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            animation:false,
+            parsing:false,
+            plugins:{legend:{display:false}},
+            scales:{
+                x:{display:false},
+                y:{
+                    position:'right',
+                    grid:{color:'rgba(148,163,184,0.08)'},
+                    ticks:{color:'#64748b', callback(value){return Number(value).toFixed(1) + '%';}}
+                }
+            }
+        }
+    });
+}
+
+async function boot(){
+    loadPreferences();
+    applyControlsFromState();
+    await loadAssets();
+
+    const selectedAsset = inferAsset(currentSymbol);
+    currentName = selectedAsset.name || currentName;
+    currentMarket = selectedAsset.market || currentMarket;
+    currentAssetClass = selectedAsset.assetClass || currentAssetClass;
+
+    renderCategoryTabs();
+    renderWatchlist(mergeAssets());
+    renderCompareTags();
+    await loadStock();
+    await loadWatchlist();
+    await loadCompareData();
+    updateMarketStatus();
+
+    intervalId = setInterval(updateStock, intervalTime);
+    watchlistIntervalId = setInterval(loadWatchlist, 60000);
+}
+
+boot();
 </script>
 
 </body>
