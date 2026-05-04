@@ -5,7 +5,6 @@ Um simulador de home broker com gráficos em tempo real, inspirado em plataforma
 🚀 Funcionalidades:
 
 📈 Gráfico de linha e candlestick
-🖱️ Arrastar gráfico (PAN horizontal)
 📊 Atualização automática de preços
 📉 Lista de ações simuladas
 ⚙️ Controle de intervalo de atualização
